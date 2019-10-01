@@ -11,12 +11,12 @@
       </div>
     </div>
     <div>
-      <% if(username){ %>
-      <h5>Username: <%= username %></53>
+      <% if(user){ %>
+      <h5>Username: <%= user.email %></53>
       <a href="/logout"><button>Log out</button></a>
       <% } else { %>
       <form method="POST" action="/login">
-        <input name="username">
+        <input name="email">
         <button value="submit">Sign in</button>
       </form>
       <% } %>

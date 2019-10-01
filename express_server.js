@@ -13,6 +13,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -22,7 +35,7 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = {urls: urlDatabase, username: req.cookies["username"],
+  let templateVars = {urls: urlDatabase, user: users[req.cookies["user_id"]],
 };
   res.render("urls_index", templateVars);
 });
@@ -33,14 +46,14 @@ app.get("/hello", function(req,res) {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"]
+    user: users[req.cookies["user_id"]]
   }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req,res) => {
   let templateVars =  {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
@@ -75,17 +88,51 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(`/urls/${req.params.id}`);
 })
 
+app.get('/login', (req, res) => {
+  
+})
 
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  let foundUser = checkSubPresence(users, 'email',req.body.email)
+  
+  //res.cookie('username', req.body.username);
+  if(foundUser){
+    res.cookie('user_id', foundUser)
+    console.log(users[foundUser.id]);
+  }
   res.redirect('/urls');
 })
 
 app.get("/logout", (req, res) => {
-  res.clearCookie('username').redirect('/urls');
+  res.clearCookie('user_id').redirect('/urls');
 })
 
+app.get('/register', (req, res) => {
+  res.render('register');
+})
+
+
+app.post('/register', (req, res) => {
+  if(req.body.password === '' || req.body.email === ''){
+    res.status(400).send("Error 400");
+  } 
+  if(checkSubPresence(users, 'email', req.body.email)){
+    res.status(400).send("Already registered");
+  }
+  let rID = grs(3);
+  let newUser = {
+    id: rID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  
+  users[rID] = newUser;
+  console.log(users);
+  res.cookie('user_id', newUser.id).redirect('/urls');
+})
+
+//generates random string of length [n]
 const grs = function generateRandomString(n) {
   let result           = '';
   let characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -95,3 +142,12 @@ const grs = function generateRandomString(n) {
   }
   return result;
 };
+
+const checkSubPresence = function checkSubObjectForKeyValue(object, key, value){
+  for(entry in object){
+    if(object[entry][key] === value){
+      return entry;
+    }
+  }
+  return false;
+}
