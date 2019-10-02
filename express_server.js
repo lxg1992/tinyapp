@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
+//server command: ./node_modules/.bin/nodemon -L express_server.js 
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -89,19 +91,30 @@ app.post("/urls/:id", (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-  
+  let templateVars = {
+    user: null
+  }
+  res.render('login', templateVars);
 })
 
 
 app.post("/login", (req, res) => {
   let foundUser = checkSubPresence(users, 'email',req.body.email)
+  let foundPW = checkSubPresence(users, 'password', req.body.password);
   
   //res.cookie('username', req.body.username);
-  if(foundUser){
+  if(foundUser && foundPW){
     res.cookie('user_id', foundUser)
     console.log(users[foundUser.id]);
+    res.redirect('/urls')
+  } else if(foundUser && !foundPW){
+    console.log('Wrong PW');
+    res.status(403).send('Wrong password');
+  } else if(!foundUser) {
+    console.log('Cannot find user');
+    res.status(403).send('No such user');
   }
-  res.redirect('/urls');
+  //res.redirect('/urls');
 })
 
 app.get("/logout", (req, res) => {
@@ -109,7 +122,10 @@ app.get("/logout", (req, res) => {
 })
 
 app.get('/register', (req, res) => {
-  res.render('register');
+  let templateVars = {
+    user: users[req.cookies["user_id"]]
+  }
+  res.render('register', templateVars);
 })
 
 
