@@ -62,7 +62,7 @@ app.get("/urls", (req, res) => {
     templateVars = {urls: urlsForUser(req.session.user_id, urlDatabase), user: users[req.session.user_id]};
     res.render("urls_index", templateVars);
   } else {
-    res.send("Please login first <a href='/login'><button>Login</button></a>");
+    res.redirect('/logout');
   }
 });
 
@@ -89,10 +89,12 @@ app.get("/urls/:shortURL", (req,res) => {
         shortURL: params.shortURL,
         longURL: urlDatabase[params.shortURL].longURL
       };
-      res.render("urls_show", templateVars);
+      res.render("urls_show", templateVars)
     }
   }
-  res.redirect('/logout');
+  if(urlDatabase[req.params.shortURL].userID !== req.session.user_id) {
+    res.redirect('/logout');
+  }
 });
 
 // Logged in && attempting to post ? append data to database and redirect to newly created URL details : redirect to /logout
@@ -151,7 +153,7 @@ app.post("/login", (req, res) => {
   }  
   if (foundUser && foundPW) {
     req.session.user_id = foundUser;
-    console.log(users[foundUser]);
+    console.log('Logging in...');
     res.redirect('/urls');
   } else if (foundUser && !foundPW) {
     console.log('Wrong PW');
@@ -185,14 +187,18 @@ app.post('/register', (req, res) => {
   if (checkSubPresence(users, 'email', req.body.email)) {
     res.status(400).send("Already registered <a href='/login'><button>Login</button></a> ");
   }
-  let hashedPW = bcrypt.hashSync(req.body.password, 10);
-  let rID = grs(3);
-  let newUser = {
+  
+  if(!checkSubPresence(users, 'email', req.body.email)) {
+    let hashedPW = bcrypt.hashSync(req.body.password, 10);
+    let rID = grs(3);
+    let newUser = {
     id: rID,
     email: req.body.email,
     password: hashedPW
-  };  
-  users[rID] = newUser;
-  req.session.user_id = newUser.id;
-  res.redirect('/urls');
+    };  
+    users[rID] = newUser;
+    req.session.user_id = newUser.id;
+    console.log('Registering and logging in...')
+    res.redirect('/urls');
+  }
 });

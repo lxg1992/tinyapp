@@ -11,22 +11,25 @@
 <body>
   <% include partials/_header %>
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
+    <h3><%= Object.keys(urls).length === 0 ? 'No URLs currently. Add URLs with "Create New URL link"' : 'My URLs' %> </h3> 
     <table class="table">
       <thead>
         <tr>
-          <th scope="col">Short URL</th>
-          <th scope="col">Long URL</th>
+          <th scope="col"><%= Object.keys(urls).length === 0 ? '' : 'Short URL' %></th>
+          <th scope="col"><%= Object.keys(urls).length === 0 ? '' : 'Long URL' %></th>
+          <th scope="col"></th>
+          <th scope="col"></th>
         </tr>
       </thead>
+      
       <tbody>
         <% for(let shorturl in urls) { %>
           <tr>
-            <td><%= shorturl %></td>
-            <td><%= urls[shorturl].longURL %></td>
+            <td><a href="/u/<%= shorturl %>"><%= shorturl %></a></td>
+            <td><a href="<%= urls[shorturl].longURL %>"><%= urls[shorturl].longURL %></a></td>
             <td><form method = "POST" action="/urls/<%= shorturl %>/delete"><button class="btn btn-danger" type="submit">DELETE</button></form>
             </td>
-            <td>            <a href="/urls/<%= shorturl %>"><button class = "btn btn-warning">EDIT</button></a>
+            <td>            <a href="/urls/<%= shorturl %>"><button class = "btn btn-warning">DETAILS</button></a>
             </td>
           </tr>
         <% } %>
