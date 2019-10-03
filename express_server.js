@@ -95,7 +95,7 @@ app.get("/urls/:shortURL", (req,res) => {
   res.redirect('/logout');
 });
 
-// Logged in && attempting to post ? append data to database and redirect to 
+// Logged in && attempting to post ? append data to database and redirect to newly created URL details : redirect to /logout
 app.post("/urls", (req, res) => {
   if(req.session.user_id === users[req.session.user_id].id) {
     let val = req.body.longURL;
@@ -107,11 +107,14 @@ app.post("/urls", (req, res) => {
   }
 });
 
+
+// Navigate to the URL defined by the user who created the shortURL
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
+//User is owner of the shortURL ? Delete the url from the database : redirect to /logout
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
     delete urlDatabase[req.params.shortURL];
@@ -121,6 +124,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }  
 });
 
+//User is owner of shortURL ? Update the longURL with the value of the name='updatedURL' input : redirect to /logout
 app.post("/urls/:id", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.id].userID) {
     urlDatabase[req.params.id].longURL = req.body.updatedURL;
@@ -130,6 +134,7 @@ app.post("/urls/:id", (req, res) => {
   }
 });
 
+//Render login page with empty 'user' object
 app.get('/login', (req, res) => {
   let templateVars = {
     user: null
@@ -137,7 +142,7 @@ app.get('/login', (req, res) => {
   res.render('login', templateVars);
 });
 
-
+// User exists in database ? (Password is correct for the user provided ? (redirect to URLs index of current user : send "Wrong PW")   : send "No such user" ) 
 app.post("/login", (req, res) => {
   let foundUser = checkSubPresence(users, 'email',req.body.email);
   let foundPW;
@@ -157,11 +162,14 @@ app.post("/login", (req, res) => {
   }
 });
 
+
+//Clear cookies and redirect to /login
 app.get("/logout", (req, res) => {
   req.session = null;
   res.redirect('/login');
 });
 
+//Get register page
 app.get('/register', (req, res) => {
   let templateVars = {
     user: users[req.session.user_id]
@@ -169,7 +177,7 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
-
+// Password OR email are empty ? (send 'Empty fields!' : Is username already in database ? (send 'Already registered' : create new user, hash password, add to users DB and redirect to /urls creating the cookie value)) 
 app.post('/register', (req, res) => {
   if (req.body.password === '' || req.body.email === '') {
     res.status(400).send("Empty fields! <a href='/register'><button>Back</button></a>");
