@@ -24,10 +24,9 @@
           <tr>
             <td><%= shorturl %></td>
             <td><%= urls[shorturl].longURL %></td>
-            <td><form method = "POST" action="/urls/<%= shorturl %>/delete"><button class="btn btn-danger" type="submit">DELETE</button></button>
-              <!--
-              <form method = "GET" action="/urls/<%= shorturl %>"><button class = "btn btn-warning" type = "submit">EDIT</button></form></form>-->
-              <a href="/urls/<%= shorturl %>"><button class = "btn btn-warning">EDIT</button></a>
+            <td><form method = "POST" action="/urls/<%= shorturl %>/delete"><button class="btn btn-danger" type="submit">DELETE</button></form>
+            </td>
+            <td>            <a href="/urls/<%= shorturl %>"><button class = "btn btn-warning">EDIT</button></a>
             </td>
           </tr>
         <% } %>

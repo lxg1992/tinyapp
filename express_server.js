@@ -1,13 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
+const bcrypt = require('bcrypt');
+
 const app = express();
 const PORT = 8080; // default port 8080
 
 //server command: ./node_modules/.bin/nodemon -L express_server.js 
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: [/* secret keys */],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -129,7 +137,7 @@ app.get('/login', (req, res) => {
 
 app.post("/login", (req, res) => {
   let foundUser = checkSubPresence(users, 'email',req.body.email)
-  let foundPW = checkSubPresence(users, 'password', req.body.password);
+  let foundPW = bcrypt.compareSync(req.body.password, users[foundUser].password);
   
   //res.cookie('username', req.body.username);
   if(foundUser && foundPW){
@@ -165,11 +173,12 @@ app.post('/register', (req, res) => {
   if(checkSubPresence(users, 'email', req.body.email)){
     res.status(400).send("Already registered");
   }
+  let hashedPW = bcrypt.hashSync(req.body.password, 10);
   let rID = grs(3);
   let newUser = {
     id: rID,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPW
   }
   
   users[rID] = newUser;
