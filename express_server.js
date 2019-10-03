@@ -32,17 +32,17 @@ const users = {
  "user2RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk",10)
   },
   "user3RandomID": {
     id: "user2RandomID", 
     email: "user2@example.com", 
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   },
   "abc": {
     id:"abc",
     email:"abc@gmail.com",
-    password:"abc"
+    password: bcrypt.hashSync("abc", 10)
   }
 }
 
@@ -141,7 +141,7 @@ app.post("/login", (req, res) => {
   
   //res.cookie('username', req.body.username);
   if(foundUser && foundPW){
-    res.session.user_id = foundUser
+    req.session.user_id = foundUser
     console.log(users[foundUser]);
     res.redirect('/urls')
   } else if(foundUser && !foundPW){
